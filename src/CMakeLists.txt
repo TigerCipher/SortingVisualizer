@@ -1,6 +1,6 @@
-﻿
+﻿find_package(glfw3 CONFIG REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
-# Add source to this project's executable.
-add_executable (SortingVisualizer "SortingVisualizer.cpp" "SortingVisualizer.h")
-
-# TODO: Add tests and install targets if needed.
+add_executable (SortingVisualizer  "main.cpp" "Display.h" "Common.h" "Display.cpp" "Visualizer.h" "Visualizer.cpp")
+target_link_libraries(SortingVisualizer PRIVATE glfw GLEW::GLEW fmt::fmt)
