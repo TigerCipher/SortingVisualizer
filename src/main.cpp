@@ -22,42 +22,122 @@
 // ------------------------------------------------------------------------------
 
 
-#include <fmt/core.h>
-#include "Display.h"
-#include "Visualizer.h"
+#include <iostream>
+#include <string>
 
-#include <GLFW/glfw3.h>
+#include "Sorting.h"
+
+#include <gl/glut.h>
+
+
+#ifdef OS_WINDOWS
+	#include <Windows.h>
+	#define SLP(x) Sleep(x)
+#else
+	#include <unistd.h>
+	#define SLP(x) sleep(x)
+#endif
+
+
+constexpr int N = 320;
+int heights[ N ];
+int gCompares = 0;
+int gSwaps = 0;
+std::string gSort;
+
+void gfx();
+void visualize(int* arr);
 
 int main(int argc, char** argv)
 {
-	Display display("Sorting Visualizer", 1280, 720);
-
-	auto counter = 0;
-
-	int arr[600];
-	for (auto& i : arr)
+	for (int i = 0; i < N; i++)
 	{
-		i = rand() % 600;
+		heights[ i ] = rand() % 600;
 	}
 
-	Visualizer visualizer(arr, 600);
-
-	glfwSetTime(0);
-	while(!display.isClosed())
-	{
-		auto fps = static_cast<double>(counter) / glfwGetTime();
-		if(glfwGetTime() >= 1.0)
-		{
-			fmt::print("FPS: {:.2f}\t-\t{:.2f} ms/frame\n", fps, 1000.0 / fps);
-			counter = 0;
-			glfwSetTime(0);
-		}
-		display.clear(255, 255, 255);
-
-		visualizer.draw(display);
-		
-		display.swap();
-		counter++;
-	}
+	glutInit(&argc, argv);
+	glutInitWindowSize(1280, 720);
+	int cx = (glutGet(GLUT_SCREEN_WIDTH) - 1280) / 2;
+	int cy = (glutGet(GLUT_SCREEN_HEIGHT) - 720) / 2;
+	glutInitWindowPosition(cx, cy);
+	glutCreateWindow("Sorting Visualizer");
+	glutDisplayFunc(gfx);
+	glClearColor(0, 0, 0, 1);
+	gluOrtho2D(0, 1280, 0, 720);
+	glutMainLoop();
 	return 0;
+}
+
+void gfx()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	visualize(heights);
+	SLP(500);
+
+	int arr[ N ];
+	for (auto i = 0; i < N; i++)
+	{
+		arr[ i ] = heights[ i ];
+	}
+
+	gCompares = 0;
+	gSwaps = 0;
+	gSort = "Quick Sort";
+	
+	quick_sort(arr, 0, N - 1, quick_smallest_to_largest, visualize, gCompares, gSwaps);
+	std::cout << gSort << " - " << gCompares << " compares and " << gSwaps << " swaps\n";
+	SLP(500);
+
+	gCompares = 0;
+	gSwaps = 0;
+	gSort = "Merge Sort";
+	for (auto i = 0; i < N; i++)
+	{
+		arr[i] = heights[i];
+	}
+	merge_sort(arr, 0, N - 1, merge_smallest_to_largest, visualize, gCompares, gSwaps);
+	std::cout << gSort << " - " << gCompares << " compares and " << gSwaps << " swaps\n";
+	SLP(500);
+
+	gCompares = 0;
+	gSwaps = 0;
+	gSort = "Heap Sort";
+	for (auto i = 0; i < N; i++)
+	{
+		arr[i] = heights[i];
+	}
+	heap_sort(arr, N, heap_smallest_to_largest, visualize, gCompares, gSwaps);
+	std::cout << gSort << " - " << gCompares << " compares and " << gSwaps << " swaps\n";
+	SLP(500);
+}
+
+void drawText(float x, float y, const std::string& txt)
+{
+	glColor3f(1, 1, 1);
+	glRasterPos2f(x, y);
+	int l = txt.size();
+	for (int i = 0; i < l; i++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, txt[ i ]);
+	}
+}
+
+void visualize(int* arr)
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	drawText(100, 700, gSort.c_str());
+	drawText(100, 680, "Compares: " + std::to_string(gCompares));
+	drawText(100, 660, "Swaps: " + std::to_string(gSwaps));
+
+	glColor3f(1.f, 0.f, 0.f);
+
+	for (int i = 0; i < N; i++)
+	{
+		glRecti(4 * i, 100, 4 * i + 3, 100 + arr[ i ]);
+	}
+
+	glFlush();
+	SLP(5);
 }
