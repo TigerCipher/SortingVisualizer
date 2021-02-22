@@ -25,13 +25,14 @@
 
 #include "Common.h"
 
+#include "Display.h"
 
 class Visualizer
 {
 public:
-	Visualizer();
+	Visualizer(int* arr, int n);
 	
-	void draw();
+	void draw(const Display& display);
 
 private:
 	UniquePtr<class Shader> mShader;
@@ -59,6 +60,7 @@ public:
 
 	void bind();
 
+	void setMatrix(const std::string& name, const glm::mat4& val);
 private:
 	uint mProgram;
 };

@@ -34,13 +34,13 @@ int main(int argc, char** argv)
 
 	auto counter = 0;
 
-	int arr[400];
+	int arr[600];
 	for (auto& i : arr)
 	{
 		i = rand() % 600;
 	}
 
-	Visualizer visualizer;
+	Visualizer visualizer(arr, 600);
 
 	glfwSetTime(0);
 	while(!display.isClosed())
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 		}
 		display.clear(255, 255, 255);
 
-		visualizer.draw();
+		visualizer.draw(display);
 		
 		display.swap();
 		counter++;

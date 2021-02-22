@@ -3,6 +3,7 @@
 #include "Common.h"
 
 #include <string>
+#include <glm/glm.hpp>
 
 class Display
 {
@@ -19,6 +20,8 @@ public:
 	[[nodiscard]] std::string title() const { return mTitle; }
 	[[nodiscard]] int width() const { return mWidth; }
 	[[nodiscard]] int height() const { return mHeight; }
+	glm::mat4 getProjection() const;
+
 private:
 	std::string mTitle;
 	int mWidth;

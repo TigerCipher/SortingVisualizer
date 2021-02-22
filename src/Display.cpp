@@ -26,6 +26,7 @@
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
 #include <fmt/core.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 void glfw_error_callback(int error, const char* desc)
 {
@@ -90,4 +91,9 @@ void Display::clear(ubyte red, ubyte green, ubyte blue)
 bool Display::isClosed()
 {
 	return glfwWindowShouldClose(mWindow);
+}
+
+glm::mat4 Display::getProjection() const
+{
+	return glm::ortho(0.f, static_cast<float>(mWidth), static_cast<float>(mHeight), 0.f, -1.f, 1.f);
 }

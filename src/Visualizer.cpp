@@ -26,36 +26,40 @@
 
 #include <gl/glew.h>
 #include <fmt/core.h>
+#include <glm/gtc/type_ptr.hpp>
 
-const char* vertex_shader_src =
-	"#version 330 core\n"
-	"layout (location = 0) in vec2 aPos;\n"
-	"void main() {\n"
-	"	gl_Position = vec4(aPos, 0.0, 1.0);\n"
-	"}";
+const char* gVertexShaderSrc =
+		"#version 330 core\n"
+		"layout (location = 0) in vec2 aPos;\n"
+		"void main() {\n"
+		"	gl_Position = vec4(aPos, 0.0, 1.0);\n"
+		"}";
 
-const char* frag_shader_src =
-	"#version 330 core\n"
-	"out vec4 fragColor;\n"
-	"void main() {\n"
-	"	fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
-	"}";
+const char* gFragShaderSrc =
+		"#version 330 core\n"
+		"out vec4 fragColor;\n"
+		"void main() {\n"
+		"	fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"}";
 
-Visualizer::Visualizer()
+Visualizer::Visualizer(int* arr, const int n)
 {
-	mShader = createScope<Shader>(vertex_shader_src, frag_shader_src);
-	mLines.push_back(Line(0, 0, 1.0f, 1.0f));
-	mLines.push_back(Line(-0.5f, 0, 1.0f, 1.0f));
-	//for(int i = 0; i < 400; i++)
-	//{
-	//	mLines.push_back()
-	//}
+	mShader = createScope<Shader>(gVertexShaderSrc, gFragShaderSrc);
+	for(int i = 0; i < n / 2; i++)
+	{
+		mLines.push_back(Line(-(4 * i), -650, -(4 * i), arr[i]));
+	}
+
+	for (int i = 1; i < (n / 2) + 1; i++)
+	{
+		mLines.push_back(Line((4 * i), -650, (4 * i), arr[(i + n/2) - 1]));
+	}
 }
 
-void Visualizer::draw()
+void Visualizer::draw(const Display& display)
 {
 	mShader->bind();
-	for(const auto& l : mLines)
+	for (const auto& l : mLines)
 	{
 		l.bind();
 		l.draw();
@@ -65,14 +69,20 @@ void Visualizer::draw()
 
 Line::Line(float x1, float y1, float x2, float y2)
 {
+
+	float _x1 = x1 / 1280.0f;
+	float _x2 = x2 / 1280.0f;
+	float _y1 = y1 / 720.0f;
+	float _y2 = y2 / 720.0f;
+	
 	glGenVertexArrays(1, &mVao);
 	glGenBuffers(1, &mVbo);
 
 	glBindVertexArray(mVao);
 	glBindBuffer(GL_ARRAY_BUFFER, mVbo);
-	float data[] = {x1, y1, x2, y2};
+	float data[ ] = { _x1, _y1, _x2, _y2 };
 	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float), data, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -84,6 +94,7 @@ void Line::bind() const
 	glBindVertexArray(mVao);
 	glBindBuffer(GL_ARRAY_BUFFER, mVbo);
 }
+
 void Line::draw() const
 {
 	glBindVertexArray(mVao);
@@ -100,7 +111,7 @@ Shader::Shader(const char* vert, const char* frag)
 	glCompileShader(vertShader);
 
 	int success;
-	char info[512];
+	char info[ 512 ];
 	glGetShaderiv(vertShader, GL_COMPILE_STATUS, &success);
 
 	if (!success)
@@ -151,4 +162,10 @@ Shader::~Shader()
 void Shader::bind()
 {
 	glUseProgram(mProgram);
+}
+
+void Shader::setMatrix(const std::string& name, const glm::mat4& val)
+{
+	uint loc = glGetAttribLocation(mProgram, name.c_str());
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
 }
