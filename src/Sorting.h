@@ -23,6 +23,7 @@
 
 #pragma once
 #include <array>
+#include <algorithm>
 #include "Common.h"
 
 template <typename T>
@@ -167,7 +168,7 @@ void merge(T arr[ ], int left, int mid, int right, bool func(T, T), void drawFun
 
 	while (i < n1 && j < n2)
 	{
-		compares+=2; // increments for both the while and the if
+		compares += 2; // increments for both the while and the if
 		if (func(larr[ i ], rarr[ j ]))
 		{
 			arr[ k ] = larr[ i ];
@@ -219,4 +220,47 @@ void merge_sort(T arr[ ], int left, int right, bool func(T, T), void drawFunc(T*
 	merge_sort(arr, left, mid, func, drawFunc, compares, swaps);
 	merge_sort(arr, mid + 1, right, func, drawFunc, compares, swaps);
 	merge(arr, left, mid, right, func, drawFunc, compares, swaps);
+}
+
+template <typename T>
+void shell_sort(T arr[ ], int n, void drawFunc(T*), int& compares, int& swaps)
+{
+	for (int gap = n / 2; gap > 0; gap /= 2)
+	{
+		for (int i = gap; i < n; i++)
+		{
+			int temp = arr[ i ];
+			int j;
+			for (j = i; j >= gap && arr[ j - gap ] > temp; j -= gap)
+			{
+				compares++;
+				arr[ j ] = arr[ j - gap ];
+				swaps++;
+				drawFunc(arr);
+			}
+			arr[ j ] = temp;
+			swaps++;
+			drawFunc(arr);
+		}
+	}
+}
+
+
+template <typename T>
+void selection_sort(T arr[ ], int n, void drawFunc(T*), int& compares, int& swaps)
+{
+	int minIndex;
+	for (int i = 0; i < n - 1; i++)
+	{
+		minIndex = i;
+		for (int j = i + 1; j < n; j++)
+		{
+			compares++;
+			if (arr[ j ] < arr[ minIndex ])
+				minIndex = j;
+		}
+		std::swap(arr[ minIndex ], arr[ i ]);
+		swaps++;
+		drawFunc(arr);
+	}
 }

@@ -43,6 +43,7 @@ constexpr int N = 320;
 int heights[ N ];
 int gCompares = 0;
 int gSwaps = 0;
+int gSleepFor = 5;
 std::string gSort;
 
 void gfx();
@@ -83,6 +84,7 @@ void gfx()
 
 	gCompares = 0;
 	gSwaps = 0;
+	gSleepFor = 5;
 	gSort = "Quick Sort";
 	
 	quick_sort(arr, 0, N - 1, quick_smallest_to_largest, visualize, gCompares, gSwaps);
@@ -92,6 +94,7 @@ void gfx()
 	gCompares = 0;
 	gSwaps = 0;
 	gSort = "Merge Sort";
+	gSleepFor = 5;
 	for (auto i = 0; i < N; i++)
 	{
 		arr[i] = heights[i];
@@ -103,6 +106,7 @@ void gfx()
 	gCompares = 0;
 	gSwaps = 0;
 	gSort = "Heap Sort";
+	gSleepFor = 5;
 	for (auto i = 0; i < N; i++)
 	{
 		arr[i] = heights[i];
@@ -110,6 +114,31 @@ void gfx()
 	heap_sort(arr, N, heap_smallest_to_largest, visualize, gCompares, gSwaps);
 	std::cout << gSort << " - " << gCompares << " compares and " << gSwaps << " swaps\n";
 	SLP(500);
+
+	gCompares = 0;
+	gSwaps = 0;
+	gSort = "Shell Sort";
+	gSleepFor = 2;
+	for (auto i = 0; i < N; i++)
+	{
+		arr[i] = heights[i];
+	}
+	shell_sort(arr, N, visualize, gCompares, gSwaps);
+	std::cout << gSort << " - " << gCompares << " compares and " << gSwaps << " swaps\n";
+	SLP(500);
+
+	gCompares = 0;
+	gSwaps = 0;
+	gSort = "Selection Sort";
+	gSleepFor = 5;
+	for (auto i = 0; i < N; i++)
+	{
+		arr[i] = heights[i];
+	}
+	selection_sort(arr, N, visualize, gCompares, gSwaps);
+	std::cout << gSort << " - " << gCompares << " compares and " << gSwaps << " swaps\n";
+	SLP(500);
+
 }
 
 void drawText(float x, float y, const std::string& txt)
@@ -127,9 +156,10 @@ void visualize(int* arr)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	drawText(100, 700, gSort.c_str());
+	drawText(100, 700, gSort);
 	drawText(100, 680, "Compares: " + std::to_string(gCompares));
 	drawText(100, 660, "Swaps: " + std::to_string(gSwaps));
+	drawText(100, 640, "Sleep: " + std::to_string(gSleepFor) + " ms");
 
 	glColor3f(1.f, 0.f, 0.f);
 
@@ -139,5 +169,5 @@ void visualize(int* arr)
 	}
 
 	glFlush();
-	SLP(5);
+	SLP(gSleepFor);
 }
