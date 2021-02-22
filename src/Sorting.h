@@ -29,16 +29,16 @@
 
 #if defined(_WIN64) || defined(_WIN32)
 	#include <Windows.h>
-	#define SLP(x) //slp(x)// Sleep(x)
+	#define SLP(x) Sleep(x)
 #else
 	#include <unistd.h>
 	#define SLP(x) sleep(x)
 #endif
 
-void slp(clock_t wait)
+
+inline void slp(const clock_t wait)
 {
-	clock_t goal;
-	goal = wait + clock();
+	const auto goal = wait + clock();
 	while(goal > clock());
 }
 
@@ -75,10 +75,10 @@ protected:
 		}
 	}
 
-	void drawStep()
+	virtual void drawStep()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		
 		drawText(5, 700, mName);
 		drawText(5, 680, "Compares: " + std::to_string(mCompares));
 		drawText(5, 660, "Swaps: " + std::to_string(mSwaps));
@@ -116,16 +116,16 @@ public:
 
 	void sort()
 	{
-		for (int i = N / 2 - 1; i >= 0; i--)
+		for (auto i = N / 2 - 1; i >= 0; --i)
 		{
 			heapify(N, i);
 		}
 
 
-		for (int i = N - 1; i > 0; i--)
+		for (auto i = N - 1; i > 0; --i)
 		{
 			std::swap(mArr[ 0 ], mArr[ i ]);
-			mSwaps++;
+			++mSwaps;
 			drawStep();
 			heapify(i, 0);
 		}
@@ -134,9 +134,9 @@ public:
 private:
 	void heapify(const int n, int i)
 	{
-		int largest = i;
-		int left = 2 * i + 1;
-		int right = 2 * i + 2;
+		auto largest = i;
+		auto left = 2 * i + 1;
+		auto right = 2 * i + 2;
 
 		++mCompares;
 		if (left < n && mArr[ left ] > mArr[ largest ])
@@ -369,3 +369,236 @@ public:
 		}
 	}
 };
+
+
+template<typename T, int N>
+class BubbleSorter : public Sorter<T, N>
+{
+	using Sorter<T, N>::drawStep;
+	using Sorter<T, N>::mSwaps;
+	using Sorter<T, N>::mCompares;
+	using Sorter<T, N>::mArr;
+	using Sorter<T, N>::mName;
+
+public:
+	BubbleSorter(T arr[N], int slp = 5) : Sorter<T, N>("Bubble Sort", arr, slp) {}
+
+	void sort()
+	{
+		for(auto i = 0; i < N - 1; i++)
+		{
+			bool swapped = false;
+			for(auto j = 0; j < N - i - 1; j++)
+			{
+				++mCompares;
+				if(mArr[j] > mArr[j + 1])
+				{
+					std::swap(mArr[j], mArr[j + 1]);
+					++mSwaps;
+					swapped = true;
+					drawStep();
+				}
+			}
+
+			if(!swapped)
+			{
+				break;
+			}
+		}
+	}
+};
+
+template<typename T, int N>
+class InsertionSorter : public Sorter<T, N>
+{
+	using Sorter<T, N>::drawStep;
+	using Sorter<T, N>::mSwaps;
+	using Sorter<T, N>::mCompares;
+	using Sorter<T, N>::mArr;
+	using Sorter<T, N>::mName;
+
+public:
+	InsertionSorter(T arr[N], int slp = 5) : Sorter<T, N>("Insertion Sort", arr, slp) {}
+
+	void sort()
+	{
+		for(int i = 0; i < N; i++)
+		{
+			int key = mArr[i];
+			int j = i - 1;
+
+			++mCompares;
+			while(j >= 0 && mArr[j] > key)
+			{
+				++mCompares;
+				mArr[j + 1] = mArr[j];
+				--j;
+				++mSwaps;
+				drawStep();
+			}
+
+			mArr[j + 1] = key;
+			++mSwaps;
+			drawStep();
+		}
+	}
+};
+
+
+template<typename T, int N>
+class CountSorter : public Sorter<T, N>
+{
+	using Sorter<T, N>::drawStep;
+	using Sorter<T, N>::mSwaps;
+	using Sorter<T, N>::mCompares;
+	using Sorter<T, N>::mArr;
+	using Sorter<T, N>::mName;
+
+public:
+	CountSorter(T arr[N], int slp = 5) : Sorter<T, N>("Count Sort", arr, slp) {}
+
+	void sort()
+	{
+		T* output = new T[N];
+		int min = getMin();
+		int max = getMax();
+		const int range = max - min + 1;
+		
+		int i;
+		T* count = new T[range]{0};
+
+		for (i = 0; i < N; i++)
+		{
+			++count[mArr[i] - min];
+		}
+
+		for (i = 1; i < range; i++)
+		{
+			count[i] += count[i - 1];
+		}
+
+		for (i = N - 1; i >= 0; i--)
+		{
+			output[count[mArr[i] - min] - 1] = mArr[i];
+			--count[mArr[i] - min];
+		}
+
+		for (i = 0; i < N; i++)
+		{
+			mArr[i] = output[i];
+			++mSwaps;
+			drawStep();
+		}
+
+
+		delete[] output;
+		delete[] count;
+	}
+
+private:
+	T getMax()
+	{
+		T mx = mArr[0];
+		for (int i = 1; i < N; i++)
+		{
+			++mCompares;
+			if (mArr[i] > mx)
+			{
+				mx = mArr[i];
+			}
+		}
+
+		return mx;
+	}
+
+	T getMin()
+	{
+		T mx = mArr[0];
+		for (int i = 1; i < N; i++)
+		{
+			++mCompares;
+			if (mArr[i] < mx)
+			{
+				mx = mArr[i];
+			}
+		}
+
+		return mx;
+	}
+};
+
+template<typename T, int N>
+class RadixSorter : public Sorter<T, N>
+{
+	using Sorter<T, N>::drawStep;
+	using Sorter<T, N>::mSwaps;
+	using Sorter<T, N>::mCompares;
+	using Sorter<T, N>::mArr;
+	using Sorter<T, N>::mName;
+	using Sorter<T, N>::mSleep;
+
+public:
+	RadixSorter(T arr[N], int slp = 5) : Sorter<T, N>("Radix Sort", arr, slp) {}
+
+	void sort()
+	{
+		T m = getMax();
+
+		for(int exp = 1; m / exp > 0; exp *= 10)
+		{
+			countSort(exp);
+		}
+	}
+
+private:
+	T getMax()
+	{
+		T mx = mArr[0];
+		for(int i = 1; i < N; i++)
+		{
+			++mCompares;
+			if(mArr[i] > mx)
+			{
+				mx = mArr[i];
+			}
+		}
+
+		return mx;
+	}
+
+	void countSort(int exp)
+	{
+		T* output = new T[N];
+		int i;
+		T count[10] = {};
+
+		for(i = 0; i < N; i++)
+		{
+			++count[(mArr[i] / exp) % 10];
+		}
+
+		for(i = 1; i < 10; i++)
+		{
+			count[i] += count[i - 1];
+		}
+
+		for(i = N - 1; i >= 0; i--)
+		{
+			output[count[(mArr[i] / exp) % 10] - 1] = mArr[i];
+			--count[(mArr[i] / exp) % 10];
+		}
+
+		for(i = 0; i < N; i++)
+		{
+			mArr[i] = output[i];
+			++mSwaps;
+			drawStep();
+		}
+
+
+		delete[] output;
+	}
+};
+
+
+// TODO: Comb sort, pigeonhole sort, maybe bucket sort

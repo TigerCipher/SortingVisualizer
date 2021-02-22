@@ -62,6 +62,26 @@ void gfx()
 	visualize(heights);
 	SLP(500);
 
+	CountSorter<int, N> count(heights);
+	count.sort();
+	count.printInfo();
+	SLP(500);
+
+	RadixSorter<int, N> radix(heights);
+	radix.sort();
+	radix.printInfo();
+	SLP(500);
+
+	InsertionSorter<int, N> insert(heights, 0);
+	insert.sort();
+	insert.printInfo();
+	SLP(500);
+	
+	BubbleSorter<int, N> bubble(heights, 0);
+	bubble.sort();
+	bubble.printInfo();
+	SLP(500);
+
 	HeapSorter<int, N> heap(heights);
 	heap.sort();
 	heap.printInfo();
@@ -85,8 +105,6 @@ void gfx()
 	SelectionSorter<int, N> selection(heights, 10);
 	selection.sort();
 	selection.printInfo();
-	SLP(500);
-	system("pause");
 }
 
 void visualize(int* arr)
