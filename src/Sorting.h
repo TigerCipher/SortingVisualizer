@@ -22,37 +22,21 @@
 // ------------------------------------------------------------------------------
 
 #pragma once
-#include <string>
 #include <iostream>
-#include <gl/freeglut.h>
-#include <ctime>
+#include <string>
+#include <queue>
+#include <vector>
 
-#if defined(_WIN64) || defined(_WIN32)
-	#include <Windows.h>
-	#define SLP(x) Sleep(x)
-#else
-	#include <unistd.h>
-	#define SLP(x) sleep(x)
-#endif
-
-
-inline void slp(const clock_t wait)
-{
-	const auto goal = wait + clock();
-	while(goal > clock());
-}
-
-template <typename T, int N>
 class Sorter
 {
 public:
-	Sorter(std::string name, T arr[ N ], const int slp = 5) :
+	Sorter(std::string name, const std::vector<int>& start, const int slp = 5) :
 		mName(std::move(name)),
 		mSleep(slp)
 	{
-		for (auto i = 0; i < N; i++)
+		for (auto i : start)
 		{
-			mArr[ i ] = arr[ i ];
+			mStartingArray.push_back(i);
 		}
 	}
 
@@ -61,543 +45,117 @@ public:
 		std::cout << mName << " - Compares: " << mCompares << " - Swaps: " << mSwaps << "\n";
 	}
 
+	std::queue<std::vector<int>>& getQueue()
+	{
+		return mQueue;
+	}
+
+	[[nodiscard]] int getSleep() const { return mSleep; }
+
 protected:
 
+	int getMax();
 
-	static void drawText(const float x, const float y, const std::string& txt)
-	{
-		glColor3f(1, 1, 1);
-		glRasterPos2f(x, y);
-
-		for (auto i : txt)
-		{
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
-		}
-	}
-
-	virtual void drawStep()
-	{
-		glClear(GL_COLOR_BUFFER_BIT);
-		
-		drawText(5, 700, mName);
-		drawText(5, 680, "Compares: " + std::to_string(mCompares));
-		drawText(5, 660, "Swaps: " + std::to_string(mSwaps));
-		drawText(5, 640, "Sleep: " + std::to_string(mSleep) + " ms");
-
-		glColor3f(1.f, 0.f, 0.f);
-
-		for (auto i = 0; i < N; i++)
-		{
-			glRecti(4 * i, 100, 4 * i + 3, 100 + mArr[ i ]);
-		}
-
-		glFlush();
-		SLP(mSleep);
-	}
+	int getMin();
 
 	std::string mName;
+	std::vector<int> mStartingArray;
 	int mSleep;
 	int mCompares = 0;
 	int mSwaps = 0;
-
-	T mArr[ N ];
+	std::queue<std::vector<int>> mQueue;
 };
 
-template <typename T, int N>
-class HeapSorter : public Sorter<T, N>
+class HeapSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
 public:
-	HeapSorter(T arr[ N ], int slp = 5) : Sorter<T, N>("Heap Sort", arr, slp) {}
+	HeapSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Heap Sort", arr, slp) {}
 
-	void sort()
-	{
-		for (auto i = N / 2 - 1; i >= 0; --i)
-		{
-			heapify(N, i);
-		}
-
-
-		for (auto i = N - 1; i > 0; --i)
-		{
-			std::swap(mArr[ 0 ], mArr[ i ]);
-			++mSwaps;
-			drawStep();
-			heapify(i, 0);
-		}
-	}
+	void sort();
 
 private:
-	void heapify(const int n, int i)
-	{
-		auto largest = i;
-		auto left = 2 * i + 1;
-		auto right = 2 * i + 2;
-
-		++mCompares;
-		if (left < n && mArr[ left ] > mArr[ largest ])
-		{
-			largest = left;
-		}
-
-		++mCompares;
-		if (right < n && mArr[ right ] > mArr[ largest ])
-		{
-			largest = right;
-		}
-
-		if (largest != i)
-		{
-			std::swap(mArr[ i ], mArr[ largest ]);
-			++mSwaps;
-			drawStep();
-			heapify(n, largest);
-		}
-	}
+	void heapify(const int n, int i);
 };
 
 
-template <typename T, int N>
-class QuickSorter : public Sorter<T, N>
+class QuickSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	QuickSorter(T arr[ N ], int slp = 5) : Sorter<T, N>("Quick Sort", arr, slp) {}
+	QuickSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Quick Sort", arr, slp) {}
 
-	void sort(int low, int high)
-	{
-		mCompares++;
-		if (low < high)
-		{
-			const int partIndex = partition(low, high);
-			sort(low, partIndex - 1);
-			sort(partIndex + 1, high);
-		}
-	}
+	void sort(int low, int high);
 
 private:
-	int partition(int low, int high)
-	{
-		T pivot = mArr[ high ];
-		int i = low - 1;
-
-		for (int j = low; j <= high - 1; j++)
-		{
-			mCompares++;
-			if (mArr[ j ] < pivot)
-			{
-				i++;
-				std::swap(mArr[ i ], mArr[ j ]);
-				mSwaps++;
-				drawStep();
-			}
-		}
-
-		std::swap(mArr[ i + 1 ], mArr[ high ]);
-		mSwaps++;
-		drawStep();
-		return i + 1;
-	}
+	int partition(int low, int high);
 };
 
-template <typename T, int N>
-class MergeSorter : public Sorter<T, N>
+
+class MergeSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	MergeSorter(T arr[ N ], int slp = 5) : Sorter<T, N>("Merge Sort", arr, slp) {}
+	MergeSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Merge Sort", arr, slp) {}
 
-	void sort(int left, int right)
-	{
-		mCompares++;
-		if (left >= right) { return; }
-		int mid = left + (right - left) / 2;
-		sort(left, mid);
-		sort(mid + 1, right);
-		merge(left, mid, right);
-	}
+	void sort(int left, int right);
 
 private:
-	void merge(int left, int mid, int right)
-	{
-		const int n1 = mid - left + 1;
-		const int n2 = right - mid;
-
-		T* larr = new T[ n1 ];
-		T* rarr = new T[ n2 ];
-
-		for (int i = 0; i < n1; i++)
-		{
-			larr[ i ] = mArr[ left + i ];
-		}
-
-		for (int i = 0; i < n2; i++)
-		{
-			rarr[ i ] = mArr[ mid + 1 + i ];
-		}
-
-		int i = 0, j = 0;
-		int k = left;
-
-		mCompares++; // Accounts for when the while loop doesn't meet the condition as well
-		while (i < n1 && j < n2)
-		{
-			mCompares += 2; // increments for both the while and the if
-			if (larr[ i ] <= rarr[ j ])
-			{
-				mArr[ k ] = larr[ i ];
-				i++;
-				mSwaps++;
-				drawStep();
-			}
-			else
-			{
-				mArr[ k ] = rarr[ j ];
-				j++;
-				mSwaps++;
-				drawStep();
-			}
-
-			k++;
-		}
-
-		mCompares++;
-		while (i < n1)
-		{
-			mCompares++;
-			mArr[ k ] = larr[ i ];
-			i++;
-			k++;
-			mSwaps++;
-			drawStep();
-		}
-
-		mCompares++;
-		while (j < n2)
-		{
-			mCompares++;
-			mArr[ k ] = rarr[ j ];
-			j++;
-			k++;
-			mSwaps++;
-			drawStep();
-		}
-
-		delete[] larr;
-		delete[] rarr;
-	}
+	void merge(int left, int mid, int right);
 };
 
 
-template<typename T, int N>
-class ShellSorter : public Sorter<T, N>
+class ShellSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	ShellSorter(T arr[N], int slp = 5) : Sorter<T, N>("Shell Sort", arr, slp) {}
+	ShellSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Shell Sort", arr, slp) {}
 
-	void sort()
-	{
-		for (int gap = N / 2; gap > 0; gap /= 2)
-		{
-			for (int i = gap; i < N; i++)
-			{
-				int temp = mArr[i];
-				int j;
-				mCompares++;
-				for (j = i; j >= gap && mArr[j - gap] > temp; j -= gap)
-				{
-					mCompares++;
-					mArr[j] = mArr[j - gap];
-					mSwaps++;
-					drawStep();
-				}
-				mArr[j] = temp;
-				mSwaps++;
-				drawStep();
-			}
-		}
-	}
+	void sort();
 };
 
 
-template<typename T, int N>
-class SelectionSorter : public Sorter<T, N>
+class SelectionSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	SelectionSorter(T arr[N], int slp = 5) : Sorter<T, N>("Selection Sort", arr, slp) {}
+	SelectionSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Selection Sort", arr, slp) {}
 
-	void sort()
-	{
-		for (int i = 0; i < N - 1; i++)
-		{
-			int minIndex = i;
-			for (int j = i + 1; j < N; j++)
-			{
-				mCompares++;
-				if (mArr[j] < mArr[minIndex])
-					minIndex = j;
-			}
-			std::swap(mArr[minIndex], mArr[i]);
-			mSwaps++;
-			drawStep();
-		}
-	}
+	void sort();
 };
 
 
-template<typename T, int N>
-class BubbleSorter : public Sorter<T, N>
+class BubbleSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	BubbleSorter(T arr[N], int slp = 5) : Sorter<T, N>("Bubble Sort", arr, slp) {}
+	BubbleSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Bubble Sort", arr, slp) {}
 
-	void sort()
-	{
-		for(auto i = 0; i < N - 1; i++)
-		{
-			bool swapped = false;
-			for(auto j = 0; j < N - i - 1; j++)
-			{
-				++mCompares;
-				if(mArr[j] > mArr[j + 1])
-				{
-					std::swap(mArr[j], mArr[j + 1]);
-					++mSwaps;
-					swapped = true;
-					drawStep();
-				}
-			}
-
-			if(!swapped)
-			{
-				break;
-			}
-		}
-	}
+	void sort();
 };
 
-template<typename T, int N>
-class InsertionSorter : public Sorter<T, N>
+class InsertionSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	InsertionSorter(T arr[N], int slp = 5) : Sorter<T, N>("Insertion Sort", arr, slp) {}
+	InsertionSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Insertion Sort", arr, slp) {}
 
-	void sort()
-	{
-		for(int i = 0; i < N; i++)
-		{
-			int key = mArr[i];
-			int j = i - 1;
-
-			++mCompares;
-			while(j >= 0 && mArr[j] > key)
-			{
-				++mCompares;
-				mArr[j + 1] = mArr[j];
-				--j;
-				++mSwaps;
-				drawStep();
-			}
-
-			mArr[j + 1] = key;
-			++mSwaps;
-			drawStep();
-		}
-	}
+	void sort();
 };
 
 
-template<typename T, int N>
-class CountSorter : public Sorter<T, N>
+class CountSorter : public Sorter
 {
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-
 public:
-	CountSorter(T arr[N], int slp = 5) : Sorter<T, N>("Count Sort", arr, slp) {}
+	CountSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Count Sort", arr, slp) {}
 
-	void sort()
-	{
-		T* output = new T[N];
-		int min = getMin();
-		int max = getMax();
-		const int range = max - min + 1;
-		
-		int i;
-		T* count = new T[range]{0};
-
-		for (i = 0; i < N; i++)
-		{
-			++count[mArr[i] - min];
-		}
-
-		for (i = 1; i < range; i++)
-		{
-			count[i] += count[i - 1];
-		}
-
-		for (i = N - 1; i >= 0; i--)
-		{
-			output[count[mArr[i] - min] - 1] = mArr[i];
-			--count[mArr[i] - min];
-		}
-
-		for (i = 0; i < N; i++)
-		{
-			mArr[i] = output[i];
-			++mSwaps;
-			drawStep();
-		}
+	void sort();
+};
 
 
-		delete[] output;
-		delete[] count;
-	}
+class RadixSorter : public Sorter
+{
+public:
+	RadixSorter(const std::vector<int>& arr, int slp = 5) : Sorter("Radix Sort", arr, slp) {}
+
+	void sort();
 
 private:
-	T getMax()
-	{
-		T mx = mArr[0];
-		for (int i = 1; i < N; i++)
-		{
-			++mCompares;
-			if (mArr[i] > mx)
-			{
-				mx = mArr[i];
-			}
-		}
 
-		return mx;
-	}
-
-	T getMin()
-	{
-		T mx = mArr[0];
-		for (int i = 1; i < N; i++)
-		{
-			++mCompares;
-			if (mArr[i] < mx)
-			{
-				mx = mArr[i];
-			}
-		}
-
-		return mx;
-	}
-};
-
-template<typename T, int N>
-class RadixSorter : public Sorter<T, N>
-{
-	using Sorter<T, N>::drawStep;
-	using Sorter<T, N>::mSwaps;
-	using Sorter<T, N>::mCompares;
-	using Sorter<T, N>::mArr;
-	using Sorter<T, N>::mName;
-	using Sorter<T, N>::mSleep;
-
-public:
-	RadixSorter(T arr[N], int slp = 5) : Sorter<T, N>("Radix Sort", arr, slp) {}
-
-	void sort()
-	{
-		T m = getMax();
-
-		for(int exp = 1; m / exp > 0; exp *= 10)
-		{
-			countSort(exp);
-		}
-	}
-
-private:
-	T getMax()
-	{
-		T mx = mArr[0];
-		for(int i = 1; i < N; i++)
-		{
-			++mCompares;
-			if(mArr[i] > mx)
-			{
-				mx = mArr[i];
-			}
-		}
-
-		return mx;
-	}
-
-	void countSort(int exp)
-	{
-		T* output = new T[N];
-		int i;
-		T count[10] = {};
-
-		for(i = 0; i < N; i++)
-		{
-			++count[(mArr[i] / exp) % 10];
-		}
-
-		for(i = 1; i < 10; i++)
-		{
-			count[i] += count[i - 1];
-		}
-
-		for(i = N - 1; i >= 0; i--)
-		{
-			output[count[(mArr[i] / exp) % 10] - 1] = mArr[i];
-			--count[(mArr[i] / exp) % 10];
-		}
-
-		for(i = 0; i < N; i++)
-		{
-			mArr[i] = output[i];
-			++mSwaps;
-			drawStep();
-		}
-
-
-		delete[] output;
-	}
+	void countSort(int exp);
 };
 
 
