@@ -42,8 +42,8 @@ public:
 
 	void printInfo() const
 	{
-		// TODO count up number of total iterations
-		std::cout << mName << " - Compares: " << mCompares << " - Swaps: " << mSwaps << " - Total time: " << mTime << " ms" <<
+		std::cout << mName << " - Compares: " << mCompares << " - Swaps: " << mSwaps
+				<< " - Total time: " << mTime << " ms - Total Iterations: " << mIts <<
 				"\n";
 	}
 
@@ -65,6 +65,7 @@ protected:
 	int mSleep;
 	int mCompares = 0;
 	int mSwaps = 0;
+	int mIts = 0;
 	float mTime = 0;
 	std::queue<std::vector<int>> mQueue;
 };

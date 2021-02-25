@@ -28,8 +28,10 @@
 int Sorter::getMax()
 {
 	int mx = mStartingArray[ 0 ];
+	mIts++;
 	for (int i = 1; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		++mCompares;
 		if (mStartingArray[ i ] > mx)
 		{
@@ -42,9 +44,11 @@ int Sorter::getMax()
 
 int Sorter::getMin()
 {
+	mIts++;
 	int mx = mStartingArray[ 0 ];
 	for (int i = 1; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		++mCompares;
 		if (mStartingArray[ i ] < mx)
 		{
@@ -57,15 +61,18 @@ int Sorter::getMin()
 
 void HeapSorter::sort()
 {
+	mIts++;
 	Timer t;
 	for (int i = mStartingArray.size() / 2 - 1; i >= 0; i--)
 	{
+		mIts++;
 		heapify(mStartingArray.size(), i);
 	}
 
 
 	for (int i = mStartingArray.size() - 1; i > 0; --i)
 	{
+		mIts++;
 		std::swap(mStartingArray[ 0 ], mStartingArray[ i ]);
 		++mSwaps;
 		mQueue.push(mStartingArray);
@@ -77,6 +84,7 @@ void HeapSorter::sort()
 
 void HeapSorter::heapify(const int n, int i)
 {
+	mIts++;
 	auto largest = i;
 	auto left = 2 * i + 1;
 	auto right = 2 * i + 2;
@@ -105,6 +113,7 @@ void HeapSorter::heapify(const int n, int i)
 
 void QuickSorter::sort(int low, int high)
 {
+	mIts++;
 	Timer t;
 	mCompares++;
 	if (low < high)
@@ -119,11 +128,13 @@ void QuickSorter::sort(int low, int high)
 
 int QuickSorter::partition(int low, int high)
 {
+	mIts++;
 	int pivot = mStartingArray[ high ];
 	int i = low - 1;
 
 	for (int j = low; j <= high - 1; j++)
 	{
+		mIts++;
 		mCompares++;
 		if (mStartingArray[ j ] < pivot)
 		{
@@ -143,6 +154,7 @@ int QuickSorter::partition(int low, int high)
 
 void MergeSorter::sort(int left, int right)
 {
+	mIts++;
 	Timer t;
 	mCompares++;
 	if (left >= right) { return; }
@@ -156,6 +168,7 @@ void MergeSorter::sort(int left, int right)
 
 void MergeSorter::merge(int left, int mid, int right)
 {
+	mIts++;
 	const int n1 = mid - left + 1;
 	const int n2 = right - mid;
 
@@ -164,11 +177,13 @@ void MergeSorter::merge(int left, int mid, int right)
 
 	for (int i = 0; i < n1; i++)
 	{
+		mIts++;
 		larr[ i ] = mStartingArray[ left + i ];
 	}
 
 	for (int i = 0; i < n2; i++)
 	{
+		mIts++;
 		rarr[ i ] = mStartingArray[ mid + 1 + i ];
 	}
 
@@ -178,6 +193,7 @@ void MergeSorter::merge(int left, int mid, int right)
 	mCompares++; // Accounts for when the while loop doesn't meet the condition as well
 	while (i < n1 && j < n2)
 	{
+		mIts++;
 		mCompares += 2; // increments for both the while and the if
 		if (larr[ i ] <= rarr[ j ])
 		{
@@ -200,6 +216,7 @@ void MergeSorter::merge(int left, int mid, int right)
 	mCompares++;
 	while (i < n1)
 	{
+		mIts++;
 		mCompares++;
 		mStartingArray[ k ] = larr[ i ];
 		i++;
@@ -211,6 +228,7 @@ void MergeSorter::merge(int left, int mid, int right)
 	mCompares++;
 	while (j < n2)
 	{
+		mIts++;
 		mCompares++;
 		mStartingArray[ k ] = rarr[ j ];
 		j++;
@@ -225,16 +243,20 @@ void MergeSorter::merge(int left, int mid, int right)
 
 void ShellSorter::sort()
 {
+	mIts++;
 	Timer t;
 	for (int gap = mStartingArray.size() / 2; gap > 0; gap /= 2)
 	{
+		mIts++;
 		for (int i = gap; i < mStartingArray.size(); i++)
 		{
+			mIts++;
 			int temp = mStartingArray[ i ];
 			int j;
 			mCompares++;
 			for (j = i; j >= gap && mStartingArray[ j - gap ] > temp; j -= gap)
 			{
+				mIts++;
 				mCompares++;
 				mStartingArray[ j ] = mStartingArray[ j - gap ];
 				mSwaps++;
@@ -250,12 +272,15 @@ void ShellSorter::sort()
 
 void SelectionSorter::sort()
 {
+	mIts++;
 	Timer t;
 	for (int i = 0; i < mStartingArray.size() - 1; i++)
 	{
+		mIts++;
 		int minIndex = i;
 		for (int j = i + 1; j < mStartingArray.size(); j++)
 		{
+			mIts++;
 			mCompares++;
 			if (mStartingArray[ j ] < mStartingArray[ minIndex ])
 				minIndex = j;
@@ -269,12 +294,15 @@ void SelectionSorter::sort()
 
 void BubbleSorter::sort()
 {
+	mIts++;
 	Timer t;
 	for (auto i = 0; i < mStartingArray.size() - 1; i++)
 	{
+		mIts++;
 		bool swapped = false;
 		for (auto j = 0; j < mStartingArray.size() - i - 1; j++)
 		{
+			mIts++;
 			++mCompares;
 			if (mStartingArray[ j ] > mStartingArray[ j + 1 ])
 			{
@@ -295,15 +323,18 @@ void BubbleSorter::sort()
 
 void InsertionSorter::sort()
 {
+	mIts++;
 	Timer t;
 	for (int i = 0; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		int key = mStartingArray[ i ];
 		int j = i - 1;
 
 		++mCompares;
 		while (j >= 0 && mStartingArray[ j ] > key)
 		{
+			mIts++;
 			++mCompares;
 			mStartingArray[ j + 1 ] = mStartingArray[ j ];
 			--j;
@@ -320,6 +351,7 @@ void InsertionSorter::sort()
 
 void CountSorter::sort()
 {
+	mIts++;
 	Timer t;
 	int* output = new int[ mStartingArray.size() ];
 	int min = getMin();
@@ -331,22 +363,26 @@ void CountSorter::sort()
 
 	for (i = 0; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		++count[ mStartingArray[ i ] - min ];
 	}
 
 	for (i = 1; i < range; i++)
 	{
+		mIts++;
 		count[ i ] += count[ i - 1 ];
 	}
 
 	for (i = mStartingArray.size() - 1; i >= 0; i--)
 	{
+		mIts++;
 		output[ count[ mStartingArray[ i ] - min ] - 1 ] = mStartingArray[ i ];
 		--count[ mStartingArray[ i ] - min ];
 	}
 
 	for (i = 0; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		mStartingArray[ i ] = output[ i ];
 		++mSwaps;
 		mQueue.push(mStartingArray);
@@ -360,11 +396,13 @@ void CountSorter::sort()
 
 void RadixSorter::sort()
 {
+	mIts++;
 	Timer t;
 	int m = getMax();
 
 	for (int exp = 1; m / exp > 0; exp *= 10)
 	{
+		mIts++;
 		countSort(exp);
 	}
 	mTime = t.elapsed();
@@ -378,22 +416,26 @@ void RadixSorter::countSort(int exp)
 
 	for (i = 0; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		++count[ (mStartingArray[ i ] / exp) % 10 ];
 	}
 
 	for (i = 1; i < 10; i++)
 	{
+		mIts++;
 		count[ i ] += count[ i - 1 ];
 	}
 
 	for (i = mStartingArray.size() - 1; i >= 0; i--)
 	{
+		mIts++;
 		output[ count[ (mStartingArray[ i ] / exp) % 10 ] - 1 ] = mStartingArray[ i ];
 		--count[ (mStartingArray[ i ] / exp) % 10 ];
 	}
 
 	for (i = 0; i < mStartingArray.size(); i++)
 	{
+		mIts++;
 		mStartingArray[ i ] = output[ i ];
 		++mSwaps;
 		mQueue.push(mStartingArray);

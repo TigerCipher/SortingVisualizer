@@ -44,7 +44,8 @@ enum SortType
 	SHELL
 };
 
-constexpr int N = 320;
+constexpr int W = 4; // 2 4 8 10
+constexpr int N = 1280 / W;
 
 std::vector<int> gHeights;
 std::vector<int> gDrawArray;
@@ -75,7 +76,7 @@ int main(int argc, char** argv)
 	srand(time(nullptr));
 	for (int i = 0; i < N; i++)
 	{
-		gHeights.push_back(rand() % 600);
+		gHeights.push_back(rand() % 720);
 	}
 
 	gDrawArray = gHeights;
@@ -109,7 +110,7 @@ void visualize(int* arr)
 
 	for (int i = 0; i < N; i++)
 	{
-		glRecti(4 * i, 100, 4 * i + 3, 100 + arr[ i ]);
+		glRecti(W * i, 0, W * i + (W - 1), arr[ i ]);
 	}
 
 	glFlush();
@@ -133,95 +134,95 @@ void on_key(unsigned char key, int x, int y)
 	if (k >= 1 && k <= 9)
 	{
 		gSortType = static_cast<SortType>(k + 1);
-	}
 
-	switch (gSortType)
-	{
-	case HEAP:
+		switch (gSortType)
 		{
-			auto* heap = new HeapSorter(gHeights);
-			heap->sort();
-			heap->printInfo();
-			gSorter = heap;
-			gSortType = DONE;
-			break;
-		}
-	case QUICK:
-		{
-			auto* quick = new QuickSorter(gHeights);
-			quick->sort(0, N - 1);
-			quick->printInfo();
-			gSorter = quick;
-			gSortType = DONE;
-			break;
-		}
-	case MERGE:
-		{
-			auto* merge = new MergeSorter(gHeights);
-			merge->sort(0, N - 1);
-			merge->printInfo();
-			gSorter = merge;
-			gSortType = DONE;
-			break;
-		}
-	case COUNT:
-		{
-			auto* count = new CountSorter(gHeights);
-			count->sort();
-			count->printInfo();
-			gSorter = count;
-			gSortType = DONE;
-			break;
-		}
-	case RADIX:
-		{
-			auto* radix = new RadixSorter(gHeights);
-			radix->sort();
-			radix->printInfo();
-			gSorter = radix;
-			gSortType = DONE;
-			break;
-		}
-	case INSERT:
-		{
-			auto* insert = new InsertionSorter(gHeights, 1);
-			insert->sort();
-			insert->printInfo();
-			gSorter = insert;
-			gSortType = DONE;
-			break;
-		}
-	case BUBBLE:
-		{
-			auto* bubble = new BubbleSorter(gHeights, 1);
-			bubble->sort();
-			bubble->printInfo();
-			gSorter = bubble;
-			gSortType = DONE;
-			break;
-		}
-	case SELECTION:
-		{
-			auto* selection = new SelectionSorter(gHeights, 10);
-			selection->sort();
-			selection->printInfo();
-			gSorter = selection;
-			gSortType = DONE;
-			break;
-		}
-	case SHELL:
-		{
-			auto* shell = new ShellSorter(gHeights, 2);
-			shell->sort();
-			shell->printInfo();
-			gSorter = shell;
-			gSortType = DONE;
-			break;
-		}
-	case NONE:
-		{
-			gDrawArray = gHeights;
-			break;
+		case HEAP:
+			{
+				auto* heap = new HeapSorter(gHeights);
+				heap->sort();
+				heap->printInfo();
+				gSorter = heap;
+				gSortType = DONE;
+				break;
+			}
+		case QUICK:
+			{
+				auto* quick = new QuickSorter(gHeights);
+				quick->sort(0, N - 1);
+				quick->printInfo();
+				gSorter = quick;
+				gSortType = DONE;
+				break;
+			}
+		case MERGE:
+			{
+				auto* merge = new MergeSorter(gHeights);
+				merge->sort(0, N - 1);
+				merge->printInfo();
+				gSorter = merge;
+				gSortType = DONE;
+				break;
+			}
+		case COUNT:
+			{
+				auto* count = new CountSorter(gHeights);
+				count->sort();
+				count->printInfo();
+				gSorter = count;
+				gSortType = DONE;
+				break;
+			}
+		case RADIX:
+			{
+				auto* radix = new RadixSorter(gHeights);
+				radix->sort();
+				radix->printInfo();
+				gSorter = radix;
+				gSortType = DONE;
+				break;
+			}
+		case INSERT:
+			{
+				auto* insert = new InsertionSorter(gHeights, 1);
+				insert->sort();
+				insert->printInfo();
+				gSorter = insert;
+				gSortType = DONE;
+				break;
+			}
+		case BUBBLE:
+			{
+				auto* bubble = new BubbleSorter(gHeights, 1);
+				bubble->sort();
+				bubble->printInfo();
+				gSorter = bubble;
+				gSortType = DONE;
+				break;
+			}
+		case SELECTION:
+			{
+				auto* selection = new SelectionSorter(gHeights, 10);
+				selection->sort();
+				selection->printInfo();
+				gSorter = selection;
+				gSortType = DONE;
+				break;
+			}
+		case SHELL:
+			{
+				auto* shell = new ShellSorter(gHeights, 2);
+				shell->sort();
+				shell->printInfo();
+				gSorter = shell;
+				gSortType = DONE;
+				break;
+			}
+		case NONE:
+			{
+				gDrawArray = gHeights;
+				break;
+			}
 		}
 	}
 }
