@@ -22,6 +22,7 @@
 // ------------------------------------------------------------------------------
 
 #include "Sorting.h"
+#include "Timer.h"
 
 
 int Sorter::getMax()
@@ -56,6 +57,7 @@ int Sorter::getMin()
 
 void HeapSorter::sort()
 {
+	Timer t;
 	for (int i = mStartingArray.size() / 2 - 1; i >= 0; i--)
 	{
 		heapify(mStartingArray.size(), i);
@@ -69,6 +71,8 @@ void HeapSorter::sort()
 		mQueue.push(mStartingArray);
 		heapify(i, 0);
 	}
+
+	mTime = t.elapsed();
 }
 
 void HeapSorter::heapify(const int n, int i)
@@ -101,6 +105,7 @@ void HeapSorter::heapify(const int n, int i)
 
 void QuickSorter::sort(int low, int high)
 {
+	Timer t;
 	mCompares++;
 	if (low < high)
 	{
@@ -108,6 +113,7 @@ void QuickSorter::sort(int low, int high)
 		sort(low, partIndex - 1);
 		sort(partIndex + 1, high);
 	}
+	mTime = t.elapsed();
 }
 
 
@@ -137,12 +143,14 @@ int QuickSorter::partition(int low, int high)
 
 void MergeSorter::sort(int left, int right)
 {
+	Timer t;
 	mCompares++;
 	if (left >= right) { return; }
 	int mid = left + (right - left) / 2;
 	sort(left, mid);
 	sort(mid + 1, right);
 	merge(left, mid, right);
+	mTime = t.elapsed();
 }
 
 
@@ -217,6 +225,7 @@ void MergeSorter::merge(int left, int mid, int right)
 
 void ShellSorter::sort()
 {
+	Timer t;
 	for (int gap = mStartingArray.size() / 2; gap > 0; gap /= 2)
 	{
 		for (int i = gap; i < mStartingArray.size(); i++)
@@ -236,10 +245,12 @@ void ShellSorter::sort()
 			mQueue.push(mStartingArray);
 		}
 	}
+	mTime = t.elapsed();
 }
 
 void SelectionSorter::sort()
 {
+	Timer t;
 	for (int i = 0; i < mStartingArray.size() - 1; i++)
 	{
 		int minIndex = i;
@@ -253,10 +264,12 @@ void SelectionSorter::sort()
 		mSwaps++;
 		mQueue.push(mStartingArray);
 	}
+	mTime = t.elapsed();
 }
 
 void BubbleSorter::sort()
 {
+	Timer t;
 	for (auto i = 0; i < mStartingArray.size() - 1; i++)
 	{
 		bool swapped = false;
@@ -277,10 +290,12 @@ void BubbleSorter::sort()
 			break;
 		}
 	}
+	mTime = t.elapsed();
 }
 
 void InsertionSorter::sort()
 {
+	Timer t;
 	for (int i = 0; i < mStartingArray.size(); i++)
 	{
 		int key = mStartingArray[ i ];
@@ -300,10 +315,12 @@ void InsertionSorter::sort()
 		++mSwaps;
 		mQueue.push(mStartingArray);
 	}
+	mTime = t.elapsed();
 }
 
 void CountSorter::sort()
 {
+	Timer t;
 	int* output = new int[ mStartingArray.size() ];
 	int min = getMin();
 	int max = getMax();
@@ -338,16 +355,19 @@ void CountSorter::sort()
 
 	delete[] output;
 	delete[] count;
+	mTime = t.elapsed();
 }
 
 void RadixSorter::sort()
 {
+	Timer t;
 	int m = getMax();
 
 	for (int exp = 1; m / exp > 0; exp *= 10)
 	{
 		countSort(exp);
 	}
+	mTime = t.elapsed();
 }
 
 void RadixSorter::countSort(int exp)

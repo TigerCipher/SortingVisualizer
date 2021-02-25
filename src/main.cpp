@@ -72,6 +72,7 @@ int main(int argc, char** argv)
 			"8 - Counting Sort\n"
 			"9 - Shell Sort\n";
 
+	srand(time(nullptr));
 	for (int i = 0; i < N; i++)
 	{
 		gHeights.push_back(rand() % 600);
@@ -183,7 +184,7 @@ void on_key(unsigned char key, int x, int y)
 		}
 	case INSERT:
 		{
-			auto* insert = new InsertionSorter(gHeights, 0);
+			auto* insert = new InsertionSorter(gHeights, 1);
 			insert->sort();
 			insert->printInfo();
 			gSorter = insert;
